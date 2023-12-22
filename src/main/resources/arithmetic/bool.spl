@@ -1,0 +1,9 @@
+
+
+a = True
+b = False
+c = a && b
+
+a = true
+b = false
+c = a && b

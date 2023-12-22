@@ -1,0 +1,6 @@
+digraph G {
+Add -> 1
+Add -> 2
+Sub -> Add
+Sub -> 3
+}
