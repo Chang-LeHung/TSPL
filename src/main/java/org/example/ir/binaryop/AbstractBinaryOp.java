@@ -10,6 +10,4 @@ public abstract class AbstractBinaryOp extends Node {
         this.right = right;
     }
 
-    public abstract void genCode();
-
 }
