@@ -1,5 +1,8 @@
 package org.example.ir.binaryop;
 
+import org.example.bytecode.Instruction;
+import org.example.bytecode.OpCode;
+import org.example.ir.ASTContext;
 import org.example.ir.Node;
 
 public class Minus extends AbstractBinaryOp{
@@ -8,12 +11,10 @@ public class Minus extends AbstractBinaryOp{
     }
 
     @Override
-    public void genCode() {
-        left.genCode();
-        right.genCode();
-        System.out.println('-');
-//        System.out.println("Sub -> " + left);
-//        System.out.println("Sub -> " + right);
+    public void genCode(ASTContext context) {
+        left.genCode(context);
+        right.genCode(context);
+        context.addInstruction(new Instruction(OpCode.SUB));
     }
 
     @Override

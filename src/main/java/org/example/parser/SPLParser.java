@@ -1,5 +1,7 @@
 package org.example.parser;
 
+import org.example.bytecode.Instruction;
+import org.example.ir.DefaultASTContext;
 import org.example.ir.Node;
 import org.example.ir.binaryop.*;
 import org.example.ir.unaryop.Invert;
@@ -18,6 +20,11 @@ public class SPLParser {
     private final List<Lexer.Token> tokens;
     private final String fileName;
     private int offset;
+    private DefaultASTContext context;
+
+    public DefaultASTContext getContext() {
+        return context;
+    }
 
     public SPLParser(String filename) throws IOException {
         this.fileName = filename;
@@ -25,6 +32,7 @@ public class SPLParser {
         lexer.doParse();
         this.tokens = lexer.getTokens();
         this.offset = 0;
+        this.context = new DefaultASTContext();
     }
 
     public Node buildAST() {
@@ -233,10 +241,12 @@ public class SPLParser {
         Node node;
         if (token.isIDENTIFIER()) {
             String name = (String) token.value;
-            node = new Variable(name);
+            int idx = context.addConstant(name);
+            node = new Variable(name, idx);
         } else {
             int value = (int) token.value;
-            node = new Int(value);
+            int idx = context.addConstant(value);
+            node = new Int(value, idx);
         }
         return node;
     }

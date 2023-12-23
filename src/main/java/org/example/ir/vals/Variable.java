@@ -1,16 +1,22 @@
 package org.example.ir.vals;
 
+import org.example.bytecode.Instruction;
+import org.example.bytecode.OpCode;
+import org.example.ir.ASTContext;
 import org.example.ir.Node;
 
 public class Variable extends Node {
     private String name;
-    public Variable(String name) {
-        this.name = name;
+    private Integer oparg;
+
+    @Override
+    public void genCode(ASTContext context) {
+        context.addInstruction(new Instruction(OpCode.LOAD_Var, oparg));
     }
 
-    public void genCode() {
-        System.out.println("LOAD_VAL " + name);
-
+    public Variable(String name, Integer oparg) {
+        this.name = name;
+        this.oparg = oparg;
     }
 
     @Override

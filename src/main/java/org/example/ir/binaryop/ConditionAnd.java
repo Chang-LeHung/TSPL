@@ -1,5 +1,8 @@
 package org.example.ir.binaryop;
 
+import org.example.bytecode.Instruction;
+import org.example.bytecode.OpCode;
+import org.example.ir.ASTContext;
 import org.example.ir.Node;
 
 public class ConditionAnd extends AbstractBinaryOp{
@@ -8,9 +11,9 @@ public class ConditionAnd extends AbstractBinaryOp{
     }
 
     @Override
-    public void genCode() {
-        left.genCode();
-        right.genCode();
-        System.out.println("&&");
+    public void genCode(ASTContext context) {
+        left.genCode(context);
+        right.genCode(context);
+        context.addInstruction(new Instruction(OpCode.CONDITIONAL_AND));
     }
 }

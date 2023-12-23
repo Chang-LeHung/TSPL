@@ -14,7 +14,6 @@ public class Add extends AbstractBinaryOp{
     public void genCode(ASTContext context) {
         left.genCode(context);
         right.genCode(context);
-        System.out.println("+");
         context.addInstruction(new Instruction(OpCode.ADD));
 //        System.out.println("Add -> " + left);
 //        System.out.println("Add -> " + right);

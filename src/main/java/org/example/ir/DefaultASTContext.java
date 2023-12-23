@@ -2,14 +2,16 @@ package org.example.ir;
 
 import org.example.bytecode.Instruction;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class DefaultASTContext implements ASTContext {
   private final List<Instruction> instructions;
+  private Map<Object, Integer> constants;
 
   public DefaultASTContext() {
+
     instructions = new ArrayList<>();
+    constants = new HashMap<>();
   }
 
   @Override
@@ -21,4 +23,21 @@ public class DefaultASTContext implements ASTContext {
   public List<Instruction> getInstructions() {
     return instructions;
   }
+
+
+
+  public Integer getConstant(Object constant) {
+    return constants.get(constant);
+  }
+  public Integer addConstant(Object constant) {
+    int value;
+    if (!constants.containsKey(constant)) {
+      value = constants.size();
+      constants.put(constant, value);
+    } else {
+      value = constants.get(constant);
+    }
+    return value;
+    }
 }
+
