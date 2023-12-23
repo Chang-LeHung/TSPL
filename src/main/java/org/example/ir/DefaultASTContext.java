@@ -2,6 +2,7 @@ package org.example.ir;
 
 import org.example.bytecode.Instruction;
 
+import java.io.ObjectStreamException;
 import java.util.*;
 
 public class DefaultASTContext implements ASTContext {
@@ -22,6 +23,16 @@ public class DefaultASTContext implements ASTContext {
   @Override
   public List<Instruction> getInstructions() {
     return instructions;
+  }
+
+  public void printInstructions() {
+    Object[] obj = new Object[constants.size()];
+    for (Map.Entry<Object, Integer> entry : constants.entrySet()) {
+      obj[entry.getValue()] = entry.getKey();
+    }
+    for (Instruction instruction : instructions) {
+      System.out.println(instruction.getOpcode() + " " + obj[instruction.getArg()]);
+    }
   }
 
 
