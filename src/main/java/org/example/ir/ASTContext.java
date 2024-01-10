@@ -10,4 +10,5 @@ public interface ASTContext {
   void addInstruction(Instruction instruction);
 
   List<Instruction> getInstructions();
+  Integer addConstant(Object constant);
 }

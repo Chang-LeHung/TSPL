@@ -98,7 +98,22 @@ public class Lexer {
         public boolean isTRUE_DIV() {return token == TOKEN_TYPE.TRUE_DIV;}
         public boolean isPOWER() {return token == TOKEN_TYPE.POWER;}
         public boolean isIDENTIFIER() {return token == TOKEN_TYPE.IDENTIFIER;}
-        public boolean isASSIGN() {return token == TOKEN_TYPE.ASSIGN;}
+        public boolean isASSIGN() {
+            return token == TOKEN_TYPE.ASSIGN
+                    || token == TOKEN_TYPE.ASSIGN_ADD
+                    || token == TOKEN_TYPE.ASSIGN_DIV
+                    || token == TOKEN_TYPE.ASSIGN_MOD
+                    || token == TOKEN_TYPE.ASSIGN_MUL
+                    || token == TOKEN_TYPE.ASSIGN_SUB
+                    || token == TOKEN_TYPE.ASSIGN_POWER
+                    || token == TOKEN_TYPE.ASSIGN_OR
+                    || token == TOKEN_TYPE.ASSIGN_AND
+                    || token == TOKEN_TYPE.ASSIGN_XOR
+                    || token == TOKEN_TYPE.ASSIGN_LSHIFT
+                    || token == TOKEN_TYPE.ASSIGN_RSHIFT
+                    || token == TOKEN_TYPE.ASSIGN_U_RSHIFT
+                    || token == TOKEN_TYPE.ASSIGN_INVERT;}
+
 
 
     }
@@ -347,9 +362,9 @@ public class Lexer {
                     if (c == '=') {
                         builder.append(c);
                         c = nextChar();
-                        token = new Token("==", TOKEN_TYPE.ASSIGN);
+                        token = new Token("==", TOKEN_TYPE.EQ);
                     } else {
-                        token = new Token("=", TOKEN_TYPE.EQ);
+                        token = new Token("=", TOKEN_TYPE.ASSIGN);
                     }
                     tokens.add(token);
                     builder.delete(0, builder.length());

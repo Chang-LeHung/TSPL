@@ -4,6 +4,7 @@ import org.example.bytecode.Instruction;
 import org.example.ir.DefaultASTContext;
 import org.example.ir.Node;
 import org.example.ir.binaryop.*;
+import org.example.ir.stmt.assignstmt.*;
 import org.example.ir.unaryop.Invert;
 import org.example.ir.unaryop.Neg;
 import org.example.ir.unaryop.Not;
@@ -39,8 +40,132 @@ public class SPLParser {
         if (root != null) {
             return root;
         }
-        root = disjunction();
+        root = statement();
         return root;
+    }
+
+    public Node statement() {
+        Lexer.Token token = tokens.get(offset);
+        if (token.isIDENTIFIER() && tokens.get(offset + 1).isASSIGN()) {
+            return assignment();
+        } else {
+            return disjunction();
+        }
+    }
+
+    public Node assignment() {
+        Lexer.Token token = tokens.get(offset);
+        offset++;
+        Lexer.Token sign = tokens.get(offset);
+        offset++;
+        switch (sign.token) {
+            case ASSIGN -> {
+                Node R = disjunction();
+                String name = (String) token.value;
+                int idx = context.addConstant(name);
+                Variable var = new Variable(name, idx);
+                AssignStmt assignStmt = new AssignStmt(var, R);
+                return assignStmt;
+            }
+            case ASSIGN_ADD -> {
+                Node R = disjunction();
+                String name = (String) token.value;
+                int idx = context.addConstant(name);
+                Variable var = new Variable(name, idx);
+                AddAssignStmt addAssignStmt = new AddAssignStmt(var, R);
+                return addAssignStmt;
+            }
+            case ASSIGN_AND -> {
+                Node R = disjunction();
+                String name = (String) token.value;
+                int idx = context.addConstant(name);
+                Variable var = new Variable(name, idx);
+                AndAssignStmt andAssignStmt = new AndAssignStmt(var, R);
+                return andAssignStmt;
+            }
+            case ASSIGN_DIV -> {
+                Node R = disjunction();
+                String name = (String) token.value;
+                int idx = context.addConstant(name);
+                Variable var = new Variable(name, idx);
+                DivAssignStmt divAssignStmt = new DivAssignStmt(var, R);
+                return divAssignStmt;
+            }
+            case ASSIGN_LSHIFT -> {
+                Node R = disjunction();
+                String name = (String) token.value;
+                int idx = context.addConstant(name);
+                Variable var = new Variable(name, idx);
+                LshiftAssignStmt lshiftAssignStmt = new LshiftAssignStmt(var, R);
+                return lshiftAssignStmt;
+            }
+            case ASSIGN_MOD -> {
+                Node R = disjunction();
+                String name = (String) token.value;
+                int idx = context.addConstant(name);
+                Variable var = new Variable(name, idx);
+                ModAssignStmt modAssignStmt = new ModAssignStmt(var, R);
+                return modAssignStmt;
+            }
+            case ASSIGN_MUL -> {
+                Node R = disjunction();
+                String name = (String) token.value;
+                int idx = context.addConstant(name);
+                Variable var = new Variable(name, idx);
+                MulAssignStmt mulAssignStmt = new MulAssignStmt(var, R);
+                return mulAssignStmt;
+            }
+            case ASSIGN_OR -> {
+                Node R = disjunction();
+                String name = (String) token.value;
+                int idx = context.addConstant(name);
+                Variable var = new Variable(name, idx);
+                OrAssignStmt orAssignStmt = new OrAssignStmt(var, R);
+                return orAssignStmt;
+            }
+            case ASSIGN_POWER -> {
+                Node R = disjunction();
+                String name = (String) token.value;
+                int idx = context.addConstant(name);
+                Variable var = new Variable(name, idx);
+                PowerAssignStmt powerAssignStmt = new PowerAssignStmt(var, R);
+                return powerAssignStmt;
+            }
+            case ASSIGN_RSHIFT -> {
+                Node R = disjunction();
+                String name = (String) token.value;
+                int idx = context.addConstant(name);
+                Variable var = new Variable(name, idx);
+                RshiftAssignStmt rshiftAssignStmt = new RshiftAssignStmt(var, R);
+                return rshiftAssignStmt;
+            }
+            case ASSIGN_SUB -> {
+                Node R = disjunction();
+                String name = (String) token.value;
+                int idx = context.addConstant(name);
+                Variable var = new Variable(name, idx);
+                SubAssignStmt subAssignStmt = new SubAssignStmt(var, R);
+                return subAssignStmt;
+            }
+            case ASSIGN_U_LSHIFT -> {
+                Node R = disjunction();
+                String name = (String) token.value;
+                int idx = context.addConstant(name);
+                Variable var = new Variable(name, idx);
+                ULshiftAssignStmt uLshiftAssignStmt = new ULshiftAssignStmt(var, R);
+                return uLshiftAssignStmt;
+            }
+            case ASSIGN_XOR -> {
+                Node R = disjunction();
+                String name = (String) token.value;
+                int idx = context.addConstant(name);
+                Variable var = new Variable(name, idx);
+                XorAssignStmt xorAssignStmt = new XorAssignStmt(var, R);
+                return xorAssignStmt;
+            }
+        }
+        return null;
+
     }
 
     private Node disjunction(){

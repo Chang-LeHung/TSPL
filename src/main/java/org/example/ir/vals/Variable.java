@@ -19,6 +19,10 @@ public class Variable extends Node {
         this.oparg = oparg;
     }
 
+    public String getName() {
+        return name;
+    }
+
     @Override
     public String toString() {
         return name;
