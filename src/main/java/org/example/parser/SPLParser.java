@@ -1,10 +1,12 @@
 package org.example.parser;
 
 import org.example.bytecode.Instruction;
+import org.example.ir.Block;
 import org.example.ir.DefaultASTContext;
 import org.example.ir.Node;
 import org.example.ir.binaryop.*;
 import org.example.ir.stmt.assignstmt.*;
+import org.example.ir.stmt.controlflow.IfStmt;
 import org.example.ir.unaryop.Invert;
 import org.example.ir.unaryop.Neg;
 import org.example.ir.unaryop.Not;
@@ -48,8 +50,53 @@ public class SPLParser {
         Lexer.Token token = tokens.get(offset);
         if (token.isIDENTIFIER() && tokens.get(offset + 1).isASSIGN()) {
             return assignment();
+        } else if (token.isIF()){
+            return ifStatement();
         } else {
             return disjunction();
+        }
+    }
+
+    public Node ifStatement() {
+        Node condition;
+        Node thenBlock;
+        Node elseBlock;
+        if (tokens.get(offset).isIF() && tokens.get(offset + 1).isLEFT_PARENTHESIS()) {
+            offset += 2;
+            condition = disjunction();
+            if (tokens.get(offset).isRIGHT_PARENTHESIS()) {
+                offset++;
+                iterateToEffectiveToken();
+                thenBlock = block();
+                if (tokens.get(offset).isELSE() && tokens.get(offset+ 1).isIF()) {
+                    offset++;
+                    elseBlock = ifStatement();
+                } else if (tokens.get(offset).isELSE()) {
+                    offset++;
+                    elseBlock = block();
+                } else {
+                    elseBlock = null;
+                }
+                return new IfStmt(condition, thenBlock, elseBlock);
+            }
+        }
+        return null;
+    }
+
+    public Node block() {
+        if (tokens.get(offset).isLEFT_BRACE()) {
+            offset++;
+            iterateToEffectiveToken();
+            Block blocks = new Block();
+            while (!tokens.get(offset).isRIGHT_BRACE()) {
+                Node n = statement();
+                blocks.addBlock(n);
+                iterateToEffectiveToken();
+            }
+            offset++;
+            return blocks;
+        } else {
+            return statement();
         }
     }
 
@@ -375,6 +422,14 @@ public class SPLParser {
         }
         return node;
     }
+
+    private void iterateToEffectiveToken() {
+        Lexer.Token token = tokens.get(offset);
+        while (token.isNEWLINE() || token.isSEMICOLON()) {
+            offset++;
+            token = tokens.get(offset);
+        }
+        }
 
 
 }

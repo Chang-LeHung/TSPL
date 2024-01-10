@@ -3,7 +3,7 @@ package org.example.bytecode;
 public class Instruction {
 
   public final OpCode opcode;
-  public final int arg;
+  public int arg;
 
   public Instruction(OpCode opcode, int arg) {
     this.opcode = opcode;
@@ -21,6 +21,10 @@ public class Instruction {
 
   public int getArg() {
     return arg;
+  }
+
+  public void updateArg(int arg) {
+    this.arg = arg;
   }
 
   @Override

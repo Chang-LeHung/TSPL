@@ -16,4 +16,12 @@ public class Equal extends AbstractBinaryOp{
         right.genCode(context);
         context.addInstruction(new Instruction(OpCode.EQ));
     }
+
+    @Override
+    public String toString() {
+        return "Equal{" +
+                "left=" + left +
+                ", right=" + right +
+                '}';
+    }
 }

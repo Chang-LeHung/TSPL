@@ -17,7 +17,7 @@ public class SPLParseTest {
 //        System.out.println(node.toString());
         node.genCode(context);
         System.out.println(context.getInstructions());
-        context.printInstructions();
+//        context.printInstructions();
     }
 
 }

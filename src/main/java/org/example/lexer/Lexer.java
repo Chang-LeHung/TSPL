@@ -114,6 +114,33 @@ public class Lexer {
                     || token == TOKEN_TYPE.ASSIGN_U_RSHIFT
                     || token == TOKEN_TYPE.ASSIGN_INVERT;}
 
+        public boolean isIF() {
+            return token == TOKEN_TYPE.IF;
+        }
+
+        public boolean isELSE() {
+            return token == TOKEN_TYPE.ELSE;
+        }
+        public boolean isLEFT_PARENTHESIS() {
+            return token == TOKEN_TYPE.LEFT_PARENTHESIS;
+        }
+        public boolean isRIGHT_PARENTHESIS() {
+            return token == TOKEN_TYPE.RIGHT_PARENTHESIS;
+        }
+
+        public boolean isLEFT_BRACE() {
+            return token == TOKEN_TYPE.LEFT_BRACE;
+        }
+        public boolean isRIGHT_BRACE() {
+            return token == TOKEN_TYPE.RIGHT_BRACE;
+        }
+        public boolean isNEWLINE() {
+            return token == TOKEN_TYPE.NEWLINE;
+        }
+        public boolean isSEMICOLON() {
+            return token == TOKEN_TYPE.SEMICOLON;
+        }
+
 
 
     }
