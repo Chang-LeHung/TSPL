@@ -1,0 +1,10 @@
+do {
+a = 1;
+b = 2;
+if (c == 1) {
+break;
+} else {
+continue;
+}
+d = 5;
+} while (a == 1)

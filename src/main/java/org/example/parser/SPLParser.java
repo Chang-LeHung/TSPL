@@ -1,21 +1,27 @@
 package org.example.parser;
 
 import org.example.bytecode.Instruction;
-import org.example.ir.Block;
-import org.example.ir.DefaultASTContext;
-import org.example.ir.Node;
+import org.example.bytecode.OpCode;
+import org.example.ir.*;
 import org.example.ir.binaryop.*;
+import org.example.ir.exp.FuncCallExp;
 import org.example.ir.stmt.assignstmt.*;
+import org.example.ir.stmt.controlflow.DoWhileStmt;
+import org.example.ir.stmt.controlflow.ForStmt;
 import org.example.ir.stmt.controlflow.IfStmt;
+import org.example.ir.stmt.controlflow.WhileStmt;
+import org.example.ir.stmt.func.FuncDef;
 import org.example.ir.unaryop.Invert;
 import org.example.ir.unaryop.Neg;
 import org.example.ir.unaryop.Not;
+import org.example.ir.vals.Float;
 import org.example.ir.vals.Int;
 import org.example.ir.vals.Variable;
 import org.example.lexer.Lexer;
 
 import java.io.IOException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SPLParser {
@@ -42,7 +48,7 @@ public class SPLParser {
         if (root != null) {
             return root;
         }
-        root = statement();
+        root = program();
         return root;
     }
 
@@ -52,12 +58,123 @@ public class SPLParser {
             return assignment();
         } else if (token.isIF()){
             return ifStatement();
-        } else {
+        } else if (token.isWHILE()) {
+            return whileStatement();
+        } else if (token.isDO()) {
+            return doWhileStatement();
+        } else if (token.isFOR()) {
+            return forStatement();
+        } else if (token.isDEF()) {
+            return funDefinition();
+        }
+        else {
             return disjunction();
         }
     }
 
-    public Node ifStatement() {
+    public Node funDefinition() {
+        if (tokens.get(offset).isDEF() && tokens.get(offset + 1).isIDENTIFIER()) {
+            offset++;
+            Lexer.Token token = tokens.get(offset);
+            String funName = (String) token.value;
+            int idx = context.addConstant(funName);
+            offset++;
+            List<String> parameters = new ArrayList<>();
+            List<Node> defaultParameters = new ArrayList<>();
+            DefaultASTContext funContext = new DefaultASTContext();
+            DefaultASTContext oldContext = context;
+            context = funContext;
+            if (tokens.get(offset).isLEFT_PARENTHESIS()) {
+                offset++;
+                while (tokens.get(offset).isIDENTIFIER()) {
+                    Lexer.Token p = tokens.get(offset);
+                    String parameter = (String) p.value;
+                    parameters.add(parameter);
+                    funContext.addConstant(parameter);
+                    offset++;
+                    if (tokens.get(offset).isPureASSIGN()) {
+                        offset++;
+                        defaultParameters.add(disjunction());
+                    }
+                    if (tokens.get(offset).isCOMMA()) {
+                        offset++;
+                    }
+                }
+                if (tokens.get(offset).isRIGHT_PARENTHESIS()) {
+                    offset++;
+                    funContext.addConstant(funName);
+                    Node funBlock = block();
+                    context = oldContext;
+                    SPLFuncObject func = new SPLFuncObject(parameters, funName, funContext, funBlock);
+                    int idxFunc = context.addConstant(func);
+                    FuncDef funcDef = new FuncDef(funName, idxFunc, idx, defaultParameters);
+                    return funcDef;
+                }
+            }
+        }
+        return null;
+    }
+
+    private Node forStatement() {
+        Node initializer;
+        Node condition;
+        Node increment;
+        Node forBlock;
+        if (tokens.get(offset).isFOR() && tokens.get(offset + 1).isLEFT_PARENTHESIS()) {
+            offset += 2;
+            initializer = statement();
+            if (tokens.get(offset).isSEMICOLON()) {
+                offset++;
+                condition = statement();
+                if (tokens.get(offset).isSEMICOLON()) {
+                    offset++;
+                    increment = statement();
+                    if (tokens.get(offset).isRIGHT_PARENTHESIS()) {
+                        offset++;
+                        forBlock = block();
+                        return new ForStmt(initializer, condition, increment, forBlock);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private Node doWhileStatement() {
+        Node condition;
+        Node doWhileBlock;
+        if (tokens.get(offset).isDO()) {
+            offset++;
+            doWhileBlock = block();
+            if (tokens.get(offset).isWHILE()
+                    && tokens.get(offset + 1).isLEFT_PARENTHESIS()) {
+                offset += 2;
+                condition = disjunction();
+                if (tokens.get(offset).isRIGHT_PARENTHESIS()) {
+                    offset++;
+                    return new DoWhileStmt(condition, doWhileBlock);
+                }
+            }
+        }
+        return null;
+    }
+
+    private Node whileStatement() {
+        Node condition;
+        Node whileBlock;
+        if (tokens.get(offset).isWHILE() && tokens.get(offset + 1).isLEFT_PARENTHESIS()) {
+            offset += 2; // 跳过while和（
+            condition = disjunction();
+            if (tokens.get(offset).isRIGHT_PARENTHESIS()) {
+                offset++;
+                whileBlock = block();
+                return new WhileStmt(condition, whileBlock);
+            }
+        }
+        return null;
+    }
+
+    private Node ifStatement() {
         Node condition;
         Node thenBlock;
         Node elseBlock;
@@ -83,7 +200,19 @@ public class SPLParser {
         return null;
     }
 
-    public Node block() {
+    private Node program() {
+        ProgramBlock programBlock = new ProgramBlock();
+//        System.out.println(tokens.size());
+        while (offset < tokens.size()) {
+            iterateToEffectiveToken();
+            if (offset < tokens.size()) {
+                programBlock.addBlock(block());
+            }
+        }
+        return programBlock;
+    }
+
+    private Node block() {
         if (tokens.get(offset).isLEFT_BRACE()) {
             offset++;
             iterateToEffectiveToken();
@@ -100,7 +229,7 @@ public class SPLParser {
         }
     }
 
-    public Node assignment() {
+    private Node assignment() {
         Lexer.Token token = tokens.get(offset);
         offset++;
         Lexer.Token sign = tokens.get(offset);
@@ -409,24 +538,62 @@ public class SPLParser {
     }
     private Node atom() {
         Lexer.Token token = tokens.get(offset);
-        offset++;
         Node node;
-        if (token.isIDENTIFIER()) {
+        if (token.isIDENTIFIER() && tokens.get(offset+1).isLEFT_PARENTHESIS()) {
+            return functionCall();
+        } else if (token.isIDENTIFIER()) {
+            offset++;
             String name = (String) token.value;
             int idx = context.addConstant(name);
             node = new Variable(name, idx);
-        } else {
+        }
+        else if (token.isINT()) {
+            offset++;
             int value = (int) token.value;
             int idx = context.addConstant(value);
             node = new Int(value, idx);
+        } else if (token.isFLOAT()) {
+            offset++;
+            float value = (float) token.value;
+            int idx = context.addConstant(value);
+            node = new Float(value, idx);
+        } else if (token.isCONTINUE()) {
+            offset++;
+            node = new Continue();
+        } else if (token.isBREAK()) {
+            offset++;
+            node = new Break();
+        } else {
+            offset++;
+            node =  null;
         }
         return node;
+    }
+
+    private Node functionCall() {
+        Lexer.Token token = tokens.get(offset);
+        String funcName = (String) token.value;
+        offset += 2;
+        List<Node> args = new ArrayList<>();
+        while (offset < tokens.size() && !tokens.get(offset).isRIGHT_PARENTHESIS()) {
+            args.add(disjunction());
+            if (offset < tokens.size() && tokens.get(offset).isCOMMA()) {
+                offset++;
+            } else {
+                break;
+            }
+        }
+        offset++;
+        return new FuncCallExp(funcName, args);
     }
 
     private void iterateToEffectiveToken() {
         Lexer.Token token = tokens.get(offset);
         while (token.isNEWLINE() || token.isSEMICOLON()) {
             offset++;
+            if (offset == tokens.size()) {
+                break;
+            }
             token = tokens.get(offset);
         }
         }

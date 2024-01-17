@@ -60,6 +60,9 @@ public class Lexer {
                     case "none" -> {
                         this.token = TOKEN_TYPE.NONE;
                     }
+                    case "def" -> {
+                        this.token = TOKEN_TYPE.DEF;
+                    }
                 }
             }
         }
@@ -141,6 +144,41 @@ public class Lexer {
             return token == TOKEN_TYPE.SEMICOLON;
         }
 
+        public boolean isWHILE() {
+            return token == TOKEN_TYPE.WHILE;
+        }
+
+        public boolean isDO() {
+            return token == TOKEN_TYPE.DO;
+        }
+        public boolean isFOR() {
+            return token == TOKEN_TYPE.FOR;
+        }
+        public boolean isINT() {
+            return token == TOKEN_TYPE.INT;
+        }
+
+        public boolean isFLOAT() {
+            return token == TOKEN_TYPE.FLOAT;
+        }
+        public boolean isCONTINUE() {
+            return token == TOKEN_TYPE.CONTINUE;
+        }
+        public boolean isBREAK() {
+            return token == TOKEN_TYPE.BREAK;
+        }
+        public boolean isDEF() {
+            return token == TOKEN_TYPE.DEF;
+        }
+        public boolean isCOMMA() {
+            return token == TOKEN_TYPE.COMMA;
+        }
+        public boolean isPureASSIGN() {
+            return token == TOKEN_TYPE.ASSIGN;
+        }
+
+
+
 
 
     }
@@ -152,7 +190,7 @@ public class Lexer {
         LEFT_PARENTHESIS, RIGHT_PARENTHESIS, LEFT_BRACE, RIGHT_BRACE, XOR, ASSIGN_XOR,ASSIGN_INVERT,
         INVERT, DOT, COMMA, SEMICOLON, NEWLINE,
         FOR, WHILE, BREAK, CONTINUE, IF, ELSE, DO, CLASS, TRUE, FALSE, IMPORT, NONE, RETURN,
-        IN;
+        IN, DEF
 
     }
 
@@ -464,7 +502,7 @@ public class Lexer {
                         token = new Token("<", TOKEN_TYPE.LT);
                     }
                     tokens.add(token);
-                    builder.delete(0, builder.length() - 1);
+                    builder.delete(0, builder.length());
                     state = CHAR_TYPE.INIT;
                 }
                 case AND -> {

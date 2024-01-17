@@ -10,14 +10,27 @@ import java.net.URL;
 public class SPLParseTest {
     @Test
     public void test01() throws IOException {
-        URL resource = Thread.currentThread().getContextClassLoader().getResource("arithmetic/test01");
+        URL resource = Thread.currentThread().getContextClassLoader().getResource("arithmetic/defTest");
         SPLParser splParser = new SPLParser(resource.getPath());
         Node node = splParser.buildAST();
         DefaultASTContext context = splParser.getContext();
 //        System.out.println(node.toString());
         node.genCode(context);
         System.out.println(context.getInstructions());
-//        context.printInstructions();
+        context.printInstructions();
+        System.out.println(context.getConstants());
+    }
+
+    @Test
+    public void test02() {
+        int a = 1;
+        if (a == 1) {
+            a = 2;
+        } else if (a == 2) {
+            a =3;
+        } else {
+            a = 4;
+        }
     }
 
 }

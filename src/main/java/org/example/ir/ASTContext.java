@@ -11,4 +11,10 @@ public interface ASTContext {
 
   List<Instruction> getInstructions();
   Integer addConstant(Object constant);
+
+  int getBreakAddress();
+  int getContinueAddress();
+
+  void setBreakAddress(int breakAddress);
+  void setContinueAddress(int continueAddress);
 }

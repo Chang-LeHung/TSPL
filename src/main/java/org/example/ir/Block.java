@@ -14,6 +14,11 @@ public class Block extends Node{
     @Override
     public void genCode(ASTContext context) {
         for (Node block : blocks) {
+            if (block instanceof Break brk) {
+                brk.setAbsoluteAddr(context.getBreakAddress());
+            } else if (block instanceof Continue cont) {
+                cont.setAbsoluteAddr(context.getContinueAddress());
+            }
             block.genCode(context);
         }
 
