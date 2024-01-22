@@ -46,6 +46,7 @@ public enum OpCode {
   JUMP_ABSOLUTE,
   MAKE_FUNCTION,
   LOAD_NAME,
-  CALL
+  CALL,
+  RETURN
 
 }

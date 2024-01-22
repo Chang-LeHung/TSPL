@@ -11,6 +11,7 @@ import org.example.ir.stmt.controlflow.ForStmt;
 import org.example.ir.stmt.controlflow.IfStmt;
 import org.example.ir.stmt.controlflow.WhileStmt;
 import org.example.ir.stmt.func.FuncDef;
+import org.example.ir.stmt.returnstmt.ReturnStmt;
 import org.example.ir.unaryop.Invert;
 import org.example.ir.unaryop.Neg;
 import org.example.ir.unaryop.Not;
@@ -66,10 +67,20 @@ public class SPLParser {
             return forStatement();
         } else if (token.isDEF()) {
             return funDefinition();
+        } else if (token.isRETURN()) {
+            return returnStatement();
         }
         else {
             return disjunction();
         }
+    }
+
+    public Node returnStatement() {
+        offset++;
+        Node expression = disjunction();
+        ReturnStmt returnStmt = new ReturnStmt(expression);
+        return returnStmt;
+
     }
 
     public Node funDefinition() {

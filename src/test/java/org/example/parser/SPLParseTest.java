@@ -10,7 +10,7 @@ import java.net.URL;
 public class SPLParseTest {
     @Test
     public void test01() throws IOException {
-        URL resource = Thread.currentThread().getContextClassLoader().getResource("arithmetic/defTest");
+        URL resource = Thread.currentThread().getContextClassLoader().getResource("arithmetic/add.spl");
         SPLParser splParser = new SPLParser(resource.getPath());
         Node node = splParser.buildAST();
         DefaultASTContext context = splParser.getContext();

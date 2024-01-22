@@ -18,6 +18,9 @@ public class FuncCallExp extends Node {
 
     @Override
     public void genCode(ASTContext context) {
+        for (Node arg : args) {
+            arg.genCode(context);
+        }
         context.addInstruction(new Instruction(OpCode.LOAD_NAME, context.addConstant(funcName)));
         context.addInstruction(new Instruction(OpCode.CALL, args.size()));
 

@@ -177,6 +177,10 @@ public class Lexer {
             return token == TOKEN_TYPE.ASSIGN;
         }
 
+        public boolean isRETURN() {
+            return token == TOKEN_TYPE.RETURN;
+        }
+
 
 
 
