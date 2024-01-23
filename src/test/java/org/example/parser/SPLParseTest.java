@@ -2,15 +2,17 @@ package org.example.parser;
 
 import org.example.ir.DefaultASTContext;
 import org.example.ir.Node;
+import org.example.vm.interpreter.DefaultEval;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 
 public class SPLParseTest {
     @Test
     public void test01() throws IOException {
-        URL resource = Thread.currentThread().getContextClassLoader().getResource("arithmetic/add.spl");
+        URL resource = Thread.currentThread().getContextClassLoader().getResource("arithmetic/defTest");
         SPLParser splParser = new SPLParser(resource.getPath());
         Node node = splParser.buildAST();
         DefaultASTContext context = splParser.getContext();
@@ -19,6 +21,17 @@ public class SPLParseTest {
         System.out.println(context.getInstructions());
         context.printInstructions();
         System.out.println(context.getConstants());
+    }
+
+    @Test
+    public void testVM() throws IOException {
+        URL resource = Thread.currentThread().getContextClassLoader().getResource("arithmetic/testBreak");
+        SPLParser splParser = new SPLParser(resource.getPath());
+        Node node = splParser.buildAST();
+        DefaultASTContext context = splParser.getContext();
+        node.genCode(context);
+        DefaultEval defaultEval = new DefaultEval(context);
+        defaultEval.evalFrame();
     }
 
     @Test
@@ -32,5 +45,6 @@ public class SPLParseTest {
             a = 4;
         }
     }
+
 
 }
