@@ -1,9 +1,6 @@
 package org.example.vm.object;
 
-import java.security.cert.CRLReason;
-import java.util.Objects;
-
-public class SPLLongObject extends SPLObject{
+public class SPLLongObject extends SPLObject {
     public static SPLLongObject[] pool;
     private long val;
 
@@ -13,10 +10,11 @@ public class SPLLongObject extends SPLObject{
 
     static {
         pool = new SPLLongObject[301];
-        for (int i = -5; i <256; i++) {
+        for (int i = -5; i < 256; i++) {
             pool[i + 5] = new SPLLongObject(i);
         }
     }
+
     private SPLLongObject(long val) {
         this.val = val;
     }
@@ -28,6 +26,7 @@ public class SPLLongObject extends SPLObject{
             return new SPLLongObject(val);
         }
     }
+
     @Override
     public SPLObject add(SPLObject rhs) {
         if (rhs instanceof SPLLongObject l) {
@@ -155,6 +154,7 @@ public class SPLLongObject extends SPLObject{
     public SPLObject neg() {
         return create(-val);
     }
+
     @Override
     public SPLObject invert() {
         return create(~getVal());
@@ -249,6 +249,11 @@ public class SPLLongObject extends SPLObject{
         if (this == o) return true;
         if (!(o instanceof SPLLongObject that)) return false;
         return val == that.val;
+    }
+
+    @Override
+    public SPLObject str() {
+        return new SPLStringObject(String.valueOf(val));
     }
 
     @Override

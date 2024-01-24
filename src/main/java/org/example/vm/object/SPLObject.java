@@ -73,7 +73,7 @@ public class SPLObject {
     public SPLObject invert() {
         return null;
     }
-    public SPLObject call(SPLObject rhs) {
+    public SPLObject call(SPLObject... rhs) {
         return null;
     }
     public SPLObject str() {

@@ -2,10 +2,9 @@ package org.example.vm.interpreter;
 
 import org.example.bytecode.Instruction;
 import org.example.ir.DefaultASTContext;
+import org.example.ir.SPLFuncObject;
 import org.example.vm.object.*;
 
-
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +17,7 @@ public class DefaultEval {
     private List<Instruction> instructions;
     private SPLObject[] constants;
     private Map<SPLObject, SPLObject> local;
+    private Map<SPLObject, SPLObject> global;
 
 
     public DefaultEval(DefaultASTContext context) {
@@ -27,11 +27,12 @@ public class DefaultEval {
         idx = 0;
         top = 0;
         local = new HashMap<>();
+        global = new HashMap<>();
         Map<Object, Integer> obj = context.getConstants();
         constants = new SPLObject[obj.size()];
         for (Map.Entry<Object, Integer> entry : obj.entrySet()) {
             if (entry.getKey() instanceof Integer) {
-                constants[entry.getValue()] = SPLLongObject.create((int)entry.getKey());
+                constants[entry.getValue()] = SPLLongObject.create((int) entry.getKey());
             } else if (entry.getKey() instanceof Double) {
                 constants[entry.getValue()] = new SPLFloatObject((double) entry.getKey());
             } else if (entry.getKey() instanceof String) {
@@ -40,9 +41,15 @@ public class DefaultEval {
         }
     }
 
+    public DefaultEval(DefaultASTContext context, Map<SPLObject, SPLObject> local) {
+        this(context);
+        this.local = local;
+    }
+
     public SPLObject evalFrame() {
         while (idx < instructions.size()) {
-            switch (instructions.get(idx).getOpcode()) {
+            var ins = instructions.get(idx);
+            switch (ins.getOpcode()) {
                 case ADD -> {
                     idx++;
                     SPLObject rhs = evalStack[--top];
@@ -145,13 +152,13 @@ public class DefaultEval {
                     evalStack[top++] = lhs.not();
                 }
                 case LSHIFT -> {
-                    idx ++;
+                    idx++;
                     SPLObject rhs = evalStack[--top];
                     SPLObject lhs = evalStack[--top];
                     evalStack[top++] = lhs.lShift(rhs);
                 }
                 case RSHIFT -> {
-                    idx ++;
+                    idx++;
                     SPLObject rhs = evalStack[--top];
                     SPLObject lhs = evalStack[--top];
                     evalStack[top++] = lhs.rShift(rhs);
@@ -179,14 +186,12 @@ public class DefaultEval {
                     evalStack[top++] = rhs.invert();
                 }
                 case ASSIGN -> {
-                    Instruction ins = instructions.get(idx);
                     idx++;
                     int arg = ins.getArg();
                     SPLObject o = evalStack[--top];
                     local.put(constants[arg], o);
                 }
                 case ADD_ASSIGN -> {
-                    Instruction ins = instructions.get(idx);
                     idx++;
                     int arg = ins.getArg();
                     SPLObject rhs = evalStack[--top];
@@ -195,7 +200,6 @@ public class DefaultEval {
                     local.put(name, lhs.add(rhs));
                 }
                 case SUB_ASSIGN -> {
-                    Instruction ins = instructions.get(idx);
                     idx++;
                     int arg = ins.getArg();
                     SPLObject rhs = evalStack[--top];
@@ -204,7 +208,6 @@ public class DefaultEval {
                     local.put(name, lhs.sub(rhs));
                 }
                 case MUL_ASSIGN -> {
-                    Instruction ins = instructions.get(idx);
                     idx++;
                     int arg = ins.getArg();
                     SPLObject rhs = evalStack[--top];
@@ -213,7 +216,6 @@ public class DefaultEval {
                     local.put(name, lhs.mul(rhs));
                 }
                 case DIV_ASSIGN -> {
-                    Instruction ins = instructions.get(idx);
                     idx++;
                     int arg = ins.getArg();
                     SPLObject rhs = evalStack[--top];
@@ -222,7 +224,6 @@ public class DefaultEval {
                     local.put(name, lhs.div(rhs));
                 }
                 case MOD_ASSIGN -> {
-                    Instruction ins = instructions.get(idx);
                     idx++;
                     int arg = ins.getArg();
                     SPLObject rhs = evalStack[--top];
@@ -231,7 +232,6 @@ public class DefaultEval {
                     local.put(name, lhs.mod(rhs));
                 }
                 case AND_ASSIGN -> {
-                    Instruction ins = instructions.get(idx);
                     idx++;
                     int arg = ins.getArg();
                     SPLObject rhs = evalStack[--top];
@@ -240,7 +240,6 @@ public class DefaultEval {
                     local.put(name, lhs.and(rhs));
                 }
                 case LSHIFT_ASSIGN -> {
-                    Instruction ins = instructions.get(idx);
                     idx++;
                     int arg = ins.getArg();
                     SPLObject rhs = evalStack[--top];
@@ -249,7 +248,6 @@ public class DefaultEval {
                     local.put(name, lhs.lShift(rhs));
                 }
                 case RSHIFT_ASSIGN -> {
-                    Instruction ins = instructions.get(idx);
                     idx++;
                     int arg = ins.getArg();
                     SPLObject rhs = evalStack[--top];
@@ -258,7 +256,6 @@ public class DefaultEval {
                     local.put(name, lhs.rShift(rhs));
                 }
                 case OR_ASSIGN -> {
-                    Instruction ins = instructions.get(idx);
                     idx++;
                     int arg = ins.getArg();
                     SPLObject rhs = evalStack[--top];
@@ -267,7 +264,6 @@ public class DefaultEval {
                     local.put(name, lhs.or(rhs));
                 }
                 case XOR_ASSIGN -> {
-                    Instruction ins = instructions.get(idx);
                     idx++;
                     int arg = ins.getArg();
                     SPLObject rhs = evalStack[--top];
@@ -275,21 +271,28 @@ public class DefaultEval {
                     SPLObject lhs = local.get(name);
                     local.put(name, lhs.xor(rhs));
                 }
-                case LOAD_Var -> {
-                    Instruction ins = instructions.get(idx);
+                case LOAD_Var, LOAD_NAME -> {
                     idx++;
                     int arg = ins.getArg();
                     SPLObject s = constants[arg];
-                    evalStack[top++] = local.get(s);
+                    var o = local.get(s);
+                    if (o == null) {
+                        o = global.get(s);
+                    }
+                    if (o == null)
+                        o = Builtin.builtin.get(s);
+                    if (o == null) {
+                        throw new RuntimeException("vm crashed, not found " + s);
+                    } else {
+                        evalStack[top++] = o;
+                    }
                 }
                 case LOAD_CONST -> {
-                    Instruction ins = instructions.get(idx);
                     idx++;
                     int arg = ins.getArg();
                     evalStack[top++] = constants[arg];
                 }
                 case JUMP_FALSE -> {
-                    Instruction ins = instructions.get(idx);
                     int arg = ins.getArg();
                     if (evalStack[--top] == SPLBoolObject.getFalse()) {
                         idx = arg;
@@ -298,7 +301,6 @@ public class DefaultEval {
                     }
                 }
                 case JUMP_TRUE -> {
-                    Instruction ins = instructions.get(idx);
                     int arg = ins.getArg();
                     if (evalStack[--top] == SPLBoolObject.getTrue()) {
                         idx = arg;
@@ -307,12 +309,28 @@ public class DefaultEval {
                     }
                 }
                 case JUMP_UNCON_FORWARD, JUMP_ABSOLUTE -> {
-                    Instruction ins = instructions.get(idx);
-                    int arg = ins.getArg();
-                    idx = arg;
+                    idx = ins.getArg();
                 }
-
-
+                case MAKE_FUNCTION -> {
+                    idx++;
+                    SPLObject f = evalStack[--top];
+                    if (f instanceof SPLFuncObject func) {
+                        local.put(new SPLStringObject(func.getFunName()), func);
+                        global.put(new SPLStringObject(func.getFunName()), func);
+                    } else {
+                        throw new RuntimeException("vm crashes");
+                    }
+                }
+                case CALL -> {
+                    idx++;
+                    int arg = ins.getArg();
+                    SPLObject f = evalStack[--top];
+                    SPLObject[] args = new SPLObject[arg];
+                    for (int i = arg - 1; i >= 0; i--) {
+                        args[i] = evalStack[--top];
+                    }
+                    evalStack[top++] = f.call(args);
+                }
             }
         }
         return null;

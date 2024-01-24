@@ -4,9 +4,9 @@ import java.util.Objects;
 
 public class SPLBoolObject extends SPLObject{
 
-    private boolean value;
+    private final boolean value;
 
-    public SPLBoolObject(boolean value) {
+    private SPLBoolObject(boolean value) {
         this.value = value;
     }
 

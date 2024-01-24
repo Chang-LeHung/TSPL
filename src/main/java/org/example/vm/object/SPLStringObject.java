@@ -3,7 +3,7 @@ package org.example.vm.object;
 import java.util.Objects;
 
 public class SPLStringObject extends SPLObject{
-    private String val;
+    private final String val;
 
     public String getVal() {
         return val;

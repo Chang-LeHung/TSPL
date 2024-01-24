@@ -35,6 +35,31 @@ public class SPLParseTest {
     }
 
     @Test
+    public void testFuncDef() throws IOException {
+        URL resource = Thread.currentThread().getContextClassLoader().getResource("arithmetic/defTest");
+        SPLParser splParser = new SPLParser(resource.getPath());
+        Node node = splParser.buildAST();
+        DefaultASTContext context = splParser.getContext();
+        node.genCode(context);
+        context.printInstructions();
+        DefaultEval defaultEval = new DefaultEval(context);
+//        defaultEval.evalFrame();
+    }
+
+    @Test
+    public void testPrint() throws IOException {
+        URL resource = Thread.currentThread().getContextClassLoader().getResource("arithmetic/add.spl");
+        SPLParser splParser = new SPLParser(resource.getPath());
+        Node node = splParser.buildAST();
+        DefaultASTContext context = splParser.getContext();
+        node.genCode(context);
+        context.printInstructions();
+        DefaultEval defaultEval = new DefaultEval(context);
+        defaultEval.evalFrame();
+    }
+
+
+    @Test
     public void test02() {
         int a = 1;
         if (a == 1) {
